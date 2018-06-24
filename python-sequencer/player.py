@@ -31,13 +31,13 @@ def calculateSecsPerTick():
 
 secsPerTick = calculateSecsPerTick()
 
-#inst = santas.Beep(['beep8C4AAD.local',
-#                    'beep94EC03.local',
-#                    'beep8C4B01.local',
-#                    'beep8C4A98.local',
-#                    'beep8C4AD0.local'], args.transpose)
 
 if args.beep:
+    #inst = santas.Beep(['beep8C4AAD.local',
+    #                    'beep94EC03.local',
+    #                    'beep8C4B01.local',
+    #                    'beep8C4A98.local',
+    #                    'beep8C4AD0.local'], args.transpose)
     inst = santas.Beep(['192.168.53.45',
                         '192.168.53.50',
                         '192.168.53.43',
@@ -54,16 +54,25 @@ else:
                         '192.168.53.43': (88, 90),
                         '192.168.53.40': (92, 93),
                         '192.168.53.44': (95, 97)}, args.transpose)
-    
+eTime = time.time()
 for track in pattern:
     for event in track:
-        time.sleep(event.tick * secsPerTick)
+        eTime += (event.tick * secsPerTick)
         if type(event) is midi.SetTempoEvent:
             usecsPerQNote = event.mpqn
             secsPerTick = calculateSecsPerTick()
+
         if type(event) is midi.NoteOnEvent and event.data[1] != 0:
-            #print "+", event.data[0]
+            while time.time() < eTime:
+                calcSleep = eTime - time.time()
+                if calcSleep > 0:
+                    pass
+                    #time.sleep(calcSleep)
             inst.play(event.data[0])
         if type(event) is midi.NoteOffEvent or (type(event) is midi.NoteOnEvent and event.data[1] == 0):
-            #print "-", event.data[0]
+            while time.time() < eTime:
+                calcSleep = eTime - time.time()
+                if calcSleep > 0:
+                    pass
+                    #time.sleep(calcSleep)
             inst.stop(event.data[0])
